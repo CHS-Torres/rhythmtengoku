@@ -1,0 +1,46 @@
+body {
+font-family: 'Courier New', Courier, monospace;
+text-align: center;
+background-color: black;
+color: rgb(0, 158, 0);
+}
+#header-text {
+    font-size: 50px;
+    text-shadow: 0 0 10px #00ff00;
+    letter-spacing: 0cm;
+    font-weight: 100;
+    display: flex;
+    justify-content: center;
+    align-items:end; 
+    height: 30vh;
+}
+#counter-text {
+    font-size: 50px;
+    text-shadow: 0 0 10px #00ff00;
+    letter-spacing: 0cm;
+    font-weight: 100;
+    display: flex;
+    justify-content: center;
+    align-items:end; 
+    height: 1vh;
+}
+#call-pattern {
+    font-size: 50px;
+    text-shadow: 0 0 10px #00ff00;
+    letter-spacing: 0cm;
+    font-weight: 100;
+    display: flex;
+    justify-content: center;
+    align-items: end; 
+    height: 20vh;
+}
+#response-pattern {
+    font-size: x-large;
+    text-shadow: 0 0 10px #00ff00;
+    letter-spacing: 0cm;
+    font-weight: 100;
+    display: flex;
+    justify-content: center;
+    align-items: end; 
+    height: 3vh;   
+}
