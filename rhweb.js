@@ -56,7 +56,7 @@ function wait() {
     metronomeSound.currentTime = 0;
     metronomeSound.play();
     counterText.textContent = metBeat;
-        if (metBeat > 8) {
+        if (metBeat > 7) {
         clearInterval(metronomeInterval);
         metBeat = 0;
         counterText.textContent = "GO!";
@@ -76,21 +76,26 @@ function playLevelCall() {
         if (levels[currentLevel][metBeat - 1] == 0) {
             metronomeSound.currentTime = 0;
             metronomeSound.play();
+            accuracyText.textContent = "Rest!";
             //counterText.textContent = "beat " + metBeat + " Null input";
         } else if (levels[currentLevel][metBeat - 1] === 1) {
             snareSound.currentTime = 0;
             snareSound.play();
+            accuracyText.textContent = "Snare!";
             //counterText.textContent = "beat " + metBeat + " A input";
         } else if (levels[currentLevel][metBeat - 1] === 2) {
             bassSound.currentTime = 0;
             bassSound.play();
+            accuracyText.textContent = "Bass!";
             //counterText.textContent = "beat " + metBeat + " B input";
         } else if (levels[currentLevel][metBeat - 1] === 3) {
             hiHatSound.currentTime = 0;
             hiHatSound.play();
+            accuracyText.textContent = "Hi-Hat!";
             //counterText.textContent = "beat " + metBeat + " C input";
         } else if (metBeat > 8) {
             clearInterval(metronomeInterval);
+            accuracyText.textContent = "";
             metBeat = 0;
             switchTurn();
         }
@@ -117,38 +122,39 @@ function playLevelResponse() {
                 if (wantedInput === "k") {
                     snareSound.currentTime = 0;
                     snareSound.play();
-                    accuracyText.textContent = "Pressed K";
                 } else if (wantedInput === "j") {
                     bassSound.currentTime = 0;
                     bassSound.play();
-                    accuracyText.textContent = "Pressed J";
                 } else if (wantedInput === "l") {
                     hiHatSound.currentTime = 0;
                     hiHatSound.play();
-                    accuracyText.textContent = "Pressed L";
                 } 
             }
         };
         addEventListener("keydown", inputLogic);
-        accuracyText.textContent = "";
         metronomeInterval = setInterval(() => {
+        counterText.textContent = " ";
         wantedInput = 0;
         metBeat++;
         if (levels[currentLevel][metBeat - 1] === 0) {
             metronomeSound.currentTime = 0;
             metronomeSound.play();
+            accuracyText.textContent = "Rest!";
             //counterText.textContent = "beat " + metBeat + " Null input";
         } else if (levels[currentLevel][metBeat - 1] === 1) {
             aInputs++;
             wantedInput = "k";
+            accuracyText.textContent = "Snare!";
             //counterText.textContent = "beat " + metBeat + " A input";
         } else if (levels[currentLevel][metBeat - 1] === 2) {
             bInputs++;
             wantedInput = "j";
+            accuracyText.textContent = "Bass!";
             //counterText.textContent = "beat " + metBeat + " B input";
         } else if (levels[currentLevel][metBeat - 1] === 3) {
             cInputs++;
             wantedInput = "l";
+            accuracyText.textContent = "Hi-Hat!";
             //counterText.textContent = "beat " + metBeat + " C input";
         }
         if (metBeat > 8) {
@@ -186,18 +192,21 @@ function levelEnd() {
     //show players overall accuracy
     accuracyText.textContent = overallAccuracy;
     optionsText.textContent = "ENTER = NEXT LEVEL / BACKSPACE = RETRY LEVEL";
-    addEventListener("keydown", (event) => {
+    const levelEndListener = (event) => {
         if (event.key === "Enter") {
             currentLevel++;
             if (currentLevel === 10) {
                 currentLevel = 0;
             }
+            removeEventListener("keydown", levelEndListener);
             loadLevel();
         }
         if (event.key === "Backspace") {
+            removeEventListener("keydown", levelEndListener);
             loadLevel();
         }
-    } , { once: true });
+    };
+    addEventListener("keydown", levelEndListener);
     //move on = increase currentLevel by one and go back to loadLevel
     //if currentLevel = 10 reset to 0
 }
