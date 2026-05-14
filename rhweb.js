@@ -2,10 +2,26 @@ const headerText = document.getElementById("header-text");
 const callPattern = document.getElementById("call-pattern");
 const responsePattern = document.getElementById("response-pattern");
 const counterText = document.getElementById("counter-text");
-let levelTempo = 120;
-let metronomeInterval;
-let currentLevel = 0;
-let metBeat = 0;
+const accuracyText = document.getElementById("accuracy-text");
+const optionsText = document.getElementById("options-text");
+const snareSound = new Audio("snare.mp3");
+const bassSound = new Audio("bass.mp3");
+const hiHatSound = new Audio("hihat.mp3");
+const metronomeSound = new Audio("metronome.mp3");
+let turn = 0; // 0 = call, 1 = response
+let levelTempo = 120; // Adjust for difficulty
+let metronomeInterval; // Interval ID
+let currentLevel = 0; // Used to track the progress through the game
+let metBeat = 0; // Current beat on the metronome
+let overallAccuracy = "";
+let beatsHit = 0;
+let keyWasPressed = false;
+let aInputs = 0;
+let bInputs = 0;
+let cInputs = 0;
+let wantedInput = 0;
+
+// All Levels stored as a 2D array
 const levels = [
 [1, 0, 0, 0, 1, 0, 0, 0],
 [1, 0, 1, 0, 1, 0, 1, 0],
@@ -18,48 +34,170 @@ const levels = [
 [1, 2, 3, 1, 2, 3, 1, 2],
 [2, 2, 1, 1, 3, 3, 1, 2]
 ];
-
+//Inputs: 0 = Rest/No Input, 1 = Uses K key for Snare Drum, 2 = Uses J key for Bass Drum, 3 = Uses L key for Hi-Hat
+// Press any key to start
+optionsText.textContent = "When you start the game, you will see a pattern of 8 numbers representing beats, there will then be an 8 beat count off, then this pattern will be demonstrated for you, you will then be given another 8 beat count off, before having to play this pattern to the tempo with the controls provided. Have fun!";
 addEventListener("keydown", loadLevel);
 
+// Loads a level when starting the game
 function loadLevel() {
+    turn = 0;
+    accuracyText.textContent = "";
+    optionsText.textContent = "0 = Rest 1 = Press K 2 = Press J 3 = Press L";
     removeEventListener("keydown", loadLevel);
     headerText.textContent = "LEVEL " + (currentLevel + 1);
-    Array.from(callPattern.rows[0].cells).forEach((cell, i) => cell.textContent = levels[currentLevel][i]);
-    metronomeInterval = setInterval(wait, 60000 / levelTempo);
+    Array.from(callPattern.rows[0].cells).forEach((cell, i) => cell.textContent = levels[currentLevel][i]); // Displays the call pattern for the level on the screen
+    metronomeInterval = setInterval(wait, 60000 / levelTempo); // Starts metronome interval
 }
 
+// Waits 4 beats
 function wait() {
     metBeat++;
+    metronomeSound.currentTime = 0;
+    metronomeSound.play();
     counterText.textContent = metBeat;
-    if (metBeat > 4) {
+        if (metBeat > 8) {
         clearInterval(metronomeInterval);
         metBeat = 0;
-        counterText.textContent = "";
-        playLevelCall();
+        counterText.textContent = "GO!";
+        if (turn == 0) {
+            playLevelCall();
+        } else if (turn == 1) {
+            playLevelResponse();
+        }
     }
 }
 
+// Plays the call pattern for the level, demonstrates the level to the player
 function playLevelCall() {
-    //go through each beat at level tempo and play the corresponding sound for each
-    //switchTurn
+    metronomeInterval = setInterval(() => {
+        metBeat++;
+        counterText.textContent = " ";
+        if (levels[currentLevel][metBeat - 1] == 0) {
+            metronomeSound.currentTime = 0;
+            metronomeSound.play();
+            //counterText.textContent = "beat " + metBeat + " Null input";
+        } else if (levels[currentLevel][metBeat - 1] === 1) {
+            snareSound.currentTime = 0;
+            snareSound.play();
+            //counterText.textContent = "beat " + metBeat + " A input";
+        } else if (levels[currentLevel][metBeat - 1] === 2) {
+            bassSound.currentTime = 0;
+            bassSound.play();
+            //counterText.textContent = "beat " + metBeat + " B input";
+        } else if (levels[currentLevel][metBeat - 1] === 3) {
+            hiHatSound.currentTime = 0;
+            hiHatSound.play();
+            //counterText.textContent = "beat " + metBeat + " C input";
+        } else if (metBeat > 8) {
+            clearInterval(metronomeInterval);
+            metBeat = 0;
+            switchTurn();
+        }
+    }, 60000 / levelTempo); 
+    
 }
 
+// Call to Response
 function switchTurn() {
+    turn++;
     Array.from(responsePattern.rows[0].cells).forEach((cell, i) => cell.textContent = levels[currentLevel][i]);
-    //wait 4 beats
-    //playLevelResponse
+    beatsHit = 0;
+    aInputs = 0;
+    bInputs = 0;
+    cInputs = 0;
+    metronomeInterval = setInterval(wait, 60000 / levelTempo);
 }
 
+// Main gameplay, has the player play the level and checks their inputs and accuracy
 function playLevelResponse() {
-    //go through each beat at level tempo
+        const inputLogic = (event) => {
+            if (event.key === wantedInput) {
+                beatsHit++;
+                if (wantedInput === "k") {
+                    snareSound.currentTime = 0;
+                    snareSound.play();
+                    accuracyText.textContent = "Pressed K";
+                } else if (wantedInput === "j") {
+                    bassSound.currentTime = 0;
+                    bassSound.play();
+                    accuracyText.textContent = "Pressed J";
+                } else if (wantedInput === "l") {
+                    hiHatSound.currentTime = 0;
+                    hiHatSound.play();
+                    accuracyText.textContent = "Pressed L";
+                } 
+            }
+        };
+        addEventListener("keydown", inputLogic);
+        accuracyText.textContent = "";
+        metronomeInterval = setInterval(() => {
+        wantedInput = 0;
+        metBeat++;
+        if (levels[currentLevel][metBeat - 1] === 0) {
+            metronomeSound.currentTime = 0;
+            metronomeSound.play();
+            //counterText.textContent = "beat " + metBeat + " Null input";
+        } else if (levels[currentLevel][metBeat - 1] === 1) {
+            aInputs++;
+            wantedInput = "k";
+            //counterText.textContent = "beat " + metBeat + " A input";
+        } else if (levels[currentLevel][metBeat - 1] === 2) {
+            bInputs++;
+            wantedInput = "j";
+            //counterText.textContent = "beat " + metBeat + " B input";
+        } else if (levels[currentLevel][metBeat - 1] === 3) {
+            cInputs++;
+            wantedInput = "l";
+            //counterText.textContent = "beat " + metBeat + " C input";
+        }
+        if (metBeat > 8) {
+            let accuracyPercentage = Math.round((beatsHit / (aInputs + bInputs + cInputs)) * 100);
+            removeEventListener("keydown", inputLogic);
+            clearInterval(metronomeInterval);
+            metBeat = 0;
+            counterText.textContent = "";
+            overallAccuracy = "Accuracy: " + accuracyPercentage + "%";
+            if (overallAccuracy === "Accuracy: NaN%") {
+                overallAccuracy = "Accuracy: 0%";
+            }
+            if (accuracyPercentage === 100) {
+                overallAccuracy += " Perfect!";
+            } else if (accuracyPercentage >= 70) {
+                overallAccuracy += " Great!";
+            } else if (accuracyPercentage >= 50) {
+                overallAccuracy += " Okay";
+            } else {
+                overallAccuracy += " Try a bit harder...";
+            }
+            levelEnd();
+        }
+
+            
+
+    }, 60000 / levelTempo); 
+    //go through each beat at level tempo 
     //check player input and their accuracy
     //levelEnd
 }
 
+// Ends the level and gives a score, moves on to the next level or restarts the current level
 function levelEnd() {
     //show players overall accuracy
-    //give option to retry level or move to the next
-    //retry = go back to playLevelCall
+    accuracyText.textContent = overallAccuracy;
+    optionsText.textContent = "ENTER = NEXT LEVEL / BACKSPACE = RETRY LEVEL";
+    addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            currentLevel++;
+            if (currentLevel === 10) {
+                currentLevel = 0;
+            }
+            loadLevel();
+        }
+        if (event.key === "Backspace") {
+            loadLevel();
+        }
+    } , { once: true });
     //move on = increase currentLevel by one and go back to loadLevel
     //if currentLevel = 10 reset to 0
 }
