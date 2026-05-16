@@ -43,9 +43,10 @@ addEventListener("keydown", loadLevel);
 function loadLevel() {
     turn = 0;
     accuracyText.textContent = "";
-    optionsText.textContent = "0 = Rest 1 = Press K 2 = Press J 3 = Press L";
+    optionsText.textContent = "0 = Rest 1 = Press J  2 = Press K 3  = Press L";
     removeEventListener("keydown", loadLevel);
     headerText.textContent = "LEVEL " + (currentLevel + 1);
+    callPattern.style.display = "flex";
     Array.from(callPattern.rows[0].cells).forEach((cell, i) => cell.textContent = levels[currentLevel][i]); // Displays the call pattern for the level on the screen
     metronomeInterval = setInterval(wait, 60000 / levelTempo); // Starts metronome interval
 }
@@ -106,6 +107,7 @@ function playLevelCall() {
 // Call to Response
 function switchTurn() {
     turn++;
+    responsePattern.style.display = "flex";
     Array.from(responsePattern.rows[0].cells).forEach((cell, i) => cell.textContent = levels[currentLevel][i]);
     beatsHit = 0;
     aInputs = 0;
@@ -119,10 +121,10 @@ function playLevelResponse() {
         const inputLogic = (event) => {
             if (event.key === wantedInput) {
                 beatsHit++;
-                if (wantedInput === "k") {
+                if (wantedInput === "j") {
                     snareSound.currentTime = 0;
                     snareSound.play();
-                } else if (wantedInput === "j") {
+                } else if (wantedInput === "k") {
                     bassSound.currentTime = 0;
                     bassSound.play();
                 } else if (wantedInput === "l") {
@@ -143,12 +145,12 @@ function playLevelResponse() {
             //counterText.textContent = "beat " + metBeat + " Null input";
         } else if (levels[currentLevel][metBeat - 1] === 1) {
             aInputs++;
-            wantedInput = "k";
+            wantedInput = "j";
             accuracyText.textContent = "Snare!";
             //counterText.textContent = "beat " + metBeat + " A input";
         } else if (levels[currentLevel][metBeat - 1] === 2) {
             bInputs++;
-            wantedInput = "j";
+            wantedInput = "k";
             accuracyText.textContent = "Bass!";
             //counterText.textContent = "beat " + metBeat + " B input";
         } else if (levels[currentLevel][metBeat - 1] === 3) {
